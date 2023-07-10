@@ -1,0 +1,138 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Role {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updateAt  DateTime @updatedAt
+    code      Int      @unique @default(2) // 0: admin, 1: brand, 2: user
+
+    User User[]
+}
+
+model User {
+    id           Int       @id @default(autoincrement())
+    createdAt    DateTime  @default(now())
+    updateAt     DateTime  @updatedAt
+    nickName     String    @db.VarChar(25)
+    userName     String
+    password     String
+    avatar       String    @default("1")
+    phoneNumber  String?   @unique
+    email        String?   @unique
+    accesstoken  String?
+    refreshtoken String?
+    role_id      Int
+    Role         Role      @relation(fields: [role_id], references: [id])
+
+    categoryGameCreate Category?  @relation(name: "create")
+    categoryGameUpdate Category?  @relation(name: "Update")
+    categoryGameDelete Category?  @relation(name: "Delete")
+    GameCreate         Game[]     @relation(name: "create")
+    GameUpdate         Game[]     @relation(name: "update")
+    GameDelete         Game[]     @relation(name: "delete")
+    voucherCreate      Voucher[]  @relation(name: "create")
+    voucherUpdate      Voucher[]  @relation(name: "update")
+    feedbackUserSend   Feedback[] @relation(name: "send")
+    feedbackBrand      Feedback[] @relation(name: "brand")
+    KeyStore           KeyStore[]
+    LoginLog           LoginLog[]
+}
+
+model Category {
+    id           Int      @id @default(autoincrement())
+    createdAt    DateTime @default(now())
+    updateAt     DateTime @updatedAt
+    nameCategory String
+    status       Boolean
+    isPushlished Boolean
+
+    userCreate_id Int             @unique
+    create        User?           @relation(fields: [userCreate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "create")
+    userUpdate_id Int             @unique
+    update        User?           @relation(fields: [userUpdate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Update")
+    userDelete_id Int             @unique
+    delete        User?           @relation(fields: [userDelete_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Delete")
+    category_game Category_Game[]
+}
+
+model Game {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    updateAt    DateTime @updatedAt
+    name        String   @unique @db.VarChar(30)
+    url         String   @unique @db.VarChar(40)
+    developer   String
+    description String   @db.VarChar(300)
+
+    userCreate_id Int
+    create        User?           @relation(fields: [userCreate_id], references: [id], name: "create")
+    userUpdate_id Int?
+    update        User?           @relation(fields: [userUpdate_id], references: [id], name: "update")
+    userDelete_id Int?
+    delete        User?           @relation(fields: [userDelete_id], references: [id], name: "delete")
+    category_game Category_Game[]
+    feedback      Feedback[]
+}
+
+model Category_Game {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+
+    category_id Int
+    category    Category @relation(fields: [category_id], references: [id])
+    game_id     Int
+    game        Game     @relation(fields: [game_id], references: [id])
+}
+
+model Voucher {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    expired   DateTime // thời hạn voucher
+    type      String
+    amount    Int      @default(0)
+
+    userCreate_id Int
+    create        User? @relation(fields: [userCreate_id], references: [id], name: "create")
+    userUpdate_id Int
+    update        User? @relation(fields: [userUpdate_id], references: [id], name: "update")
+}
+
+model Feedback {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    status      Boolean  @default(false)
+    title       String   @db.VarChar(50)
+    content     String?  @db.VarChar(3000)
+    email       String?
+    userSend_id Int
+    create      User     @relation(fields: [userSend_id], references: [id], name: "send")
+    brand_id    Int
+    brand       User     @relation(fields: [brand_id], references: [id], name: "brand")
+    game_id     Int
+    game        Game     @relation(fields: [game_id], references: [id])
+}
+
+model KeyStore {
+    id           Int      @id @default(autoincrement())
+    createdAt    DateTime @default(now())
+    updateAt     DateTime @updatedAt
+    primaryKey   String
+    secondaryKey String
+    status       Boolean?
+    user_id      Int
+    user         User     @relation(fields: [user_id], references: [id])
+}
+
+model LoginLog {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    user_id   Int
+    user      User     @relation(fields: [user_id], references: [id])
+}
