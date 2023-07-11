@@ -2,7 +2,7 @@ export default interface Category {
   id: Number;
   createAt: Date;
   updateAt: Date;
-  nameCategory: string;
+  name: string;
   status: boolean;
   isPushlished: boolean;
   userCreate_id: Number;

@@ -150,8 +150,8 @@ async function removeUserById(req: Request, res: Response) {
 async function handleUser(req: ProtectedRequest, res: Response) { 
   try {
     let user = req.user;
+    console.log(153, user)
     if (req.body.nickName) {
-      console.log(req.body.nickName);
       let userUpdate = await UserRepo.handleNickName(Number(user.id), req.body.nickName);
       return res.json({message: "update nick name sucessfully", status: 200, data: userUpdate})
     }

@@ -133,8 +133,8 @@ async function removeUserById(req, res) {
 async function handleUser(req, res) {
     try {
         let user = req.user;
+        console.log(153, user);
         if (req.body.nickName) {
-            console.log(req.body.nickName);
             let userUpdate = await UserRepo_1.default.handleNickName(Number(user.id), req.body.nickName);
             return res.json({ message: "update nick name sucessfully", status: 200, data: userUpdate });
         }

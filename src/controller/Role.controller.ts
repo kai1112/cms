@@ -1,10 +1,14 @@
 import { Response, Request } from "express";
 import role from "../repository/RoleRepo";
 
+
 async function create(req: Request, res: Response) {
   try {
     if (!req.body.code) {
       return res.json({ message: "code not found" });
+    }
+    if (req.body.code > 2 || req.body.code < 0) { 
+      return res.json({ message: "invalid code", status: 404 });
     }
     let data = await role.create(req.body);
     return res.json(data);

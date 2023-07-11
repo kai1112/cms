@@ -24,19 +24,64 @@ async function checkLogin(req, res, next) {
         const payload = await jwt.verify(req.accessToken, primaryKey);
         const player = await prisma_1.default.user.findFirst({
             where: {
-                id: Number(payload.data.id)
-            }
+                id: Number(payload.data.id),
+            },
+            include: {
+                Role: true,
+            },
         });
         if (!player)
-            return ('User not registered');
+            return "User not registered";
         req.user = player;
         return next();
     }
     catch (e) {
-        return res.json({ message: 'something went wrong', status: 404 });
+        return res.json({ message: "something went wrong", status: 404 });
+    }
+}
+async function checkRoleAdmin(req, res, next) {
+    try {
+        if (req.user.Role.code == 0) {
+            return next();
+        }
+        else {
+            res.status(403).json({ message: "role is not allowed" });
+        }
+    }
+    catch (e) {
+        return res.json({ message: "something went wrong", status: 404 });
+    }
+}
+async function checkRoleBrands(req, res, next) {
+    try {
+        if (req.user.Role.code == 1) {
+            return next();
+        }
+        else {
+            res.status(403).json({ message: "role is not allowed" });
+        }
+    }
+    catch (e) {
+        return res.json({ message: "something went wrong", status: 404 });
+    }
+}
+async function checkRoleUser(req, res, next) {
+    try {
+        if (req.user.Role.code == 2) {
+            return next();
+        }
+        else {
+            res.status(403).json({ message: "role is not allowed" });
+        }
+    }
+    catch (e) {
+        return res.json({ message: "something went wrong", status: 404 });
     }
 }
 exports.default = {
-    checkLogin
+    checkLogin,
+    checkRoleAdmin,
+    checkRoleBrands,
+    checkRoleUser,
 };
 //# sourceMappingURL=checkLogin.js.map

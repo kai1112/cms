@@ -1,36 +1,32 @@
 const router = require("express").Router();
 import checkauth from "../../middleware/checkLogin";
-import role from "../../controller/Role.controller";
+import Category from "../../controller/Category.controller";
 
 router.post(
   "/create",
   checkauth.checkLogin,
   checkauth.checkRoleAdmin,
-  role.create
+  Category.create
 );
-router.get(
-  "/find-by-id/:id",
+router.get("/find-name", Category.findName);
+router.get("/find-all", Category.findAll);
+router.put(
+  "/update-name/:id",
   checkauth.checkLogin,
   checkauth.checkRoleAdmin,
-  role.findById
-);
-router.get(
-  "/find-all",
-  checkauth.checkLogin,
-  checkauth.checkRoleAdmin,
-  role.findAllRole
+  Category.handleName
 );
 router.put(
-  "/update/:id",
+  "/update-status/:id",
   checkauth.checkLogin,
   checkauth.checkRoleAdmin,
-  role.update
+  Category.handleStatus
 );
-router.delete(
-  "/delete/:id",
+router.put(
+  "/update-isPushlished/:id",
   checkauth.checkLogin,
   checkauth.checkRoleAdmin,
-  role.remove
+  Category.handleIsPushlished
 );
 
 export default router;

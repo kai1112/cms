@@ -26,22 +26,71 @@ async function checkLogin(
     );
     const payload = await jwt.verify(req.accessToken, primaryKey);
     const player = await prisma.user.findFirst({
-        where:{
-            id: Number(payload.data.id)
-        }
-    })
-    if (!player) return ('User not registered')
-      req.user = player;
+      where: {
+        id: Number(payload.data.id),
+      },
+      include: {
+        Role: true,
+      },
+    });
+    if (!player) return "User not registered";
+    req.user = player;
     return next();
   } catch (e) {
-    return res.json({message: 'something went wrong', status: 404})
+    return res.json({ message: "something went wrong", status: 404 });
   }
 }
 
-
-
-
-
-export default {
-    checkLogin
+async function checkRoleAdmin(
+  req: ProtectedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<any> {
+    try {
+    if (req.user.Role.code == 0) {
+      return next();
+    } else {
+      res.status(403).json({ message: "role is not allowed" });
+    }
+  } catch (e) {
+    return res.json({ message: "something went wrong", status: 404 });
+  }
 }
+
+async function checkRoleBrands(
+  req: ProtectedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<any> {
+  try {
+    if (req.user.Role.code == 1) {
+      return next();
+    } else {
+      res.status(403).json({ message: "role is not allowed" });
+    }
+  } catch (e) {
+    return res.json({ message: "something went wrong", status: 404 });
+  }
+}
+
+async function checkRoleUser(
+  req: ProtectedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<any> {
+  try {
+    if (req.user.Role.code == 2) {
+      return next();
+    } else {
+      res.status(403).json({ message: "role is not allowed" });
+    }
+  } catch (e) {
+    return res.json({ message: "something went wrong", status: 404 });
+  }
+}
+export default {
+  checkLogin,
+  checkRoleAdmin,
+  checkRoleBrands,
+  checkRoleUser,
+};

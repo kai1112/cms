@@ -17,19 +17,19 @@ model Role {
 }
 
 model User {
-    id           Int       @id @default(autoincrement())
-    createdAt    DateTime  @default(now())
-    updateAt     DateTime  @updatedAt
-    nickName     String    @db.VarChar(25)
+    id           Int      @id @default(autoincrement())
+    createdAt    DateTime @default(now())
+    updateAt     DateTime @updatedAt
+    nickName     String   @db.VarChar(25)
     userName     String
     password     String
-    avatar       String    @default("1")
-    phoneNumber  String?   @unique
-    email        String?   @unique
+    avatar       String   @default("1")
+    phoneNumber  String?  @unique
+    email        String?  @unique
     accesstoken  String?
     refreshtoken String?
     role_id      Int
-    Role         Role      @relation(fields: [role_id], references: [id])
+    Role         Role     @relation(fields: [role_id], references: [id])
 
     categoryGameCreate Category?  @relation(name: "create")
     categoryGameUpdate Category?  @relation(name: "Update")
@@ -49,28 +49,28 @@ model Category {
     id           Int      @id @default(autoincrement())
     createdAt    DateTime @default(now())
     updateAt     DateTime @updatedAt
-    nameCategory String
-    status       Boolean
-    isPushlished Boolean
+    name         String   @unique
+    status       Boolean  
+    isPushlished Boolean  
 
     userCreate_id Int             @unique
     create        User?           @relation(fields: [userCreate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "create")
-    userUpdate_id Int             @unique
+    userUpdate_id Int?            @unique
     update        User?           @relation(fields: [userUpdate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Update")
-    userDelete_id Int             @unique
+    userDelete_id Int?            @unique
     delete        User?           @relation(fields: [userDelete_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Delete")
     category_game Category_Game[]
 }
 
 model Game {
-    id          Int      @id @default(autoincrement())
-    createdAt   DateTime @default(now())
-    updateAt    DateTime @updatedAt
-    name        String   @unique @db.VarChar(30)
-    url         String   @unique @db.VarChar(40)
-    developer   String
-    description String   @db.VarChar(300)
-
+    id            Int             @id @default(autoincrement())
+    createdAt     DateTime        @default(now())
+    updateAt      DateTime        @updatedAt
+    name          String          @unique @db.VarChar(30)
+    url           String          @unique @db.VarChar(40)
+    developer     String
+    description   String          @db.VarChar(300)
+    status        Int             @default(0) // 0 là hiện lên, 1 là ẩn đi
     userCreate_id Int
     create        User?           @relation(fields: [userCreate_id], references: [id], name: "create")
     userUpdate_id Int?
