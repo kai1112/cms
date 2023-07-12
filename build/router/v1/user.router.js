@@ -11,6 +11,7 @@ router.post("/login", User_controller_1.default.login);
 router.get("/get-user/:id", checkLogin_1.default.checkLogin, User_controller_1.default.getUserById);
 router.get("/get-all-user", checkLogin_1.default.checkLogin, checkLogin_1.default.checkRoleAdmin, User_controller_1.default.getAllUsers);
 router.post("/handle-user", checkLogin_1.default.checkLogin, User_controller_1.default.handleUser);
+router.post("/handle-password", checkLogin_1.default.checkLogin, User_controller_1.default.handlePassword);
 router.delete("/delete-user/:id", checkLogin_1.default.checkLogin, checkLogin_1.default.checkRoleAdmin, User_controller_1.default.removeUserById);
 exports.default = router;
 //# sourceMappingURL=user.router.js.map

@@ -6,6 +6,7 @@ import { promisify } from "util";
 import { readFile } from "fs";
 import path from "path";
 import { ProtectedRequest } from "app-requst";
+import prisma from "../lib/prisma";
 const jwt = require("jsonwebtoken");
 
 async function signUp(req: Request, res: Response) {
@@ -75,6 +76,15 @@ async function login(req: Request, res: Response) {
     );
     await UserRepo.updateToken(user.id, accessToken, refreshToken);
     let dataUser = await UserRepo.findByUserName(req.body.userName);
+    console.log(79, dataUser);
+    let loginlog = await prisma.loginLog.create({
+      data: {
+        user_id: dataUser.data.id,
+      },
+    });
+    if (!loginlog) {
+      console.log("save login log failed");
+    }
     return res.json({
       message: "login sucessfully",
       status: 200,
@@ -89,28 +99,27 @@ async function login(req: Request, res: Response) {
   }
 }
 
-async function getUserById(req: Request, res: Response) { 
+async function getUserById(req: Request, res: Response) {
   try {
-      let user = await UserRepo.findById(Number(req.params.id));
-      if (user.status!== 200) {
-        return res.json({
-          message: "user not found",
-          status: 404,
-        });
-      }
+    let user = await UserRepo.findById(Number(req.params.id));
+    if (user.status !== 200) {
       return res.json({
-        message: "user found",
-        status: 200,
-        data: user.data,
+        message: "user not found",
+        status: 404,
       });
-    } catch (e) {
-      return res.json({ message: e, status: 404 });
     }
+    return res.json({
+      message: "user found",
+      status: 200,
+      data: user.data,
+    });
+  } catch (e) {
+    return res.json({ message: e, status: 404 });
+  }
 }
 
 async function getAllUsers(req: ProtectedRequest, res: Response) {
   try {
-
     let users = await UserRepo.findAll();
     if (users.status !== 200) {
       return res.json({
@@ -128,55 +137,126 @@ async function getAllUsers(req: ProtectedRequest, res: Response) {
   }
 }
 
-async function removeUserById(req: Request, res: Response) { 
+async function removeUserById(req: Request, res: Response) {
   try {
-      let user = await UserRepo.deleteById(Number(req.params.id));
-      if (user.status!== 200) {
-        return res.json({
-          message: "user not found",
-          status: 404,
-        });
-      }
+    let user = await UserRepo.deleteById(Number(req.params.id));
+    if (user.status !== 200) {
       return res.json({
-        message: "remove user sucessfully",
-        status: 200,
-        data: user,
+        message: "user not found",
+        status: 404,
       });
-    } catch (e) {
-      return res.json({ message: e, status: 404 });
     }
-}
-
-async function handleUser(req: ProtectedRequest, res: Response) { 
-  try {
-    let user = req.user;
-    console.log(153, user)
-    if (req.body.nickName) {
-      let userUpdate = await UserRepo.handleNickName(Number(user.id), req.body.nickName);
-      return res.json({message: "update nick name sucessfully", status: 200, data: userUpdate})
-    }
-    if (req.body.avatar) {
-      let userUpdate = await UserRepo.handleAvatar(Number(user.id), req.body.avatar);
-      return res.json({ message: "update avatar sucessfully", status: 200 , data: userUpdate})
-    }
-    if (req.body.phoneNumber) {
-      let userUpdate = await UserRepo.handlePhoneNumber(Number(user.id), req.body.phoneNumber);
-      return res.json({ message: "update phone number sucessfully", status: 200 , data: userUpdate})
-    }
-    if (req.body.email) {
-      let userUpdate = await UserRepo.handleEmail(Number(user.id), req.body.email);
-      return res.json({ message: "update email sucessfully", status: 200 , data: userUpdate})
-    }
-  } catch (e) { 
+    return res.json({
+      message: "remove user sucessfully",
+      status: 200,
+      data: user,
+    });
+  } catch (e) {
     return res.json({ message: e, status: 404 });
   }
 }
 
+async function handleUser(req: ProtectedRequest, res: Response) {
+  try {
+    let user = req.user;
+    if (req.body.nickName) {
+      let userUpdate = await UserRepo.handleNickName(
+        Number(user.id),
+        req.body.nickName
+      );
+      return res.json({
+        message: "update nick name sucessfully",
+        status: 200,
+        data: userUpdate,
+      });
+    }
+    if (req.body.avatar) {
+      let userUpdate = await UserRepo.handleAvatar(
+        Number(user.id),
+        req.body.avatar
+      );
+      return res.json({
+        message: "update avatar sucessfully",
+        status: 200,
+        data: userUpdate,
+      });
+    }
+    if (req.body.phoneNumber) {
+      let userUpdate = await UserRepo.handlePhoneNumber(
+        Number(user.id),
+        req.body.phoneNumber
+      );
+      return res.json({
+        message: "update phone number sucessfully",
+        status: 200,
+        data: userUpdate,
+      });
+    }
+    if (req.body.email) {
+      let userUpdate = await UserRepo.handleEmail(
+        Number(user.id),
+        req.body.email
+      );
+      return res.json({
+        message: "update email sucessfully",
+        status: 200,
+        data: userUpdate,
+      });
+    }
+  } catch (e) {
+    return res.json({ message: e, status: 404 });
+  }
+}
+
+async function handlePassword(req: ProtectedRequest, res: Response) {
+  try {
+    let user = req.user;
+    if (!req.body.oldPassword) {
+      return res.json({
+        message: "password is required",
+        status: 404,
+      });
+    }
+    if (!req.body.newPassword) {
+      return res.json({
+        message: "password is required",
+        status: 404,
+      });
+    }
+    if (user.Role.code !== 0) {
+      const password = await bcrypt.compare(
+        req.body.oldPassword,
+        user.data.password
+      );
+      if (!password) {
+        return res.json({
+          message: "old password is not valid",
+          status: 404,
+        });
+      }
+    }
+    let userUpdate = await UserRepo.handlePassword(
+      user.id,
+      req.body.newPassword
+    );
+    if (userUpdate.status !== 200) {
+      return res.json({ message: userUpdate.message, status: 404 });
+    }
+    return res.json({
+      message: "update password sucessfully",
+      status: 200,
+      data: userUpdate,
+    });
+  } catch (e) {
+    return res.json({ message: e, status: 404 });
+  }
+}
 export default {
   signUp,
   login,
   getAllUsers,
   removeUserById,
   getUserById,
-  handleUser
+  handleUser,
+  handlePassword,
 };

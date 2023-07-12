@@ -46,7 +46,7 @@ async function checkRoleAdmin(
   res: Response,
   next: NextFunction
 ): Promise<any> {
-    try {
+  try {
     if (req.user.Role.code == 0) {
       return next();
     } else {

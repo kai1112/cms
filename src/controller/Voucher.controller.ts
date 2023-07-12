@@ -18,6 +18,7 @@ async function create(req: ProtectedRequest, res: Response) {
       return res.json({ message: "voucher type is required", status: 404 });
     }
     let voucher = await VoucherRepo.create(user.id, req.body);
+    console.log(21, voucher)
     if (voucher.status !== 200) {
       return res.json({ message: voucher.message, status: voucher.status });
     }
@@ -33,14 +34,18 @@ async function create(req: ProtectedRequest, res: Response) {
 
 async function findAllVouchers(req: Request, res: Response) {
   try {
-          let vouchers = await VoucherRepo.findall()
-          if (vouchers.status!== 200) {
-              return res.json({message: vouchers.message, status: vouchers.status})
-          }
-          return res.json({message: vouchers.message, status: vouchers.status, data: vouchers.data})
-      } catch (error) {
-          res.json({ message: error, status: 404 });
-      }
+    let vouchers = await VoucherRepo.findall();
+    if (vouchers.status !== 200) {
+      return res.json({ message: vouchers.message, status: vouchers.status });
+    }
+    return res.json({
+      message: vouchers.message,
+      status: vouchers.status,
+      data: vouchers.data,
+    });
+  } catch (error) {
+    res.json({ message: error, status: 404 });
+  }
 }
 
 async function findVoucherById(req: Request, res: Response) {
@@ -95,6 +100,14 @@ async function update(req: ProtectedRequest, res: Response) {
       Number(req.params.id),
       req.body.amount
     );
+    if (voucher.status !== 200) {
+      return res.json({ message: voucher.message, status: voucher.status });
+    }
+    return res.json({
+      message: voucher.message,
+      status: voucher.status,
+      data: voucher.data,
+    });
   } catch (error) {
     res.json({ message: error, status: 404 });
   }

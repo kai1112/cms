@@ -1,11 +1,10 @@
 export default interface Voucher {
   id: Number;
-  createAt: Date;
   name: string;
   title: string;
   expired: Date;
   type: string;
-  status: number;
+  status: Number;
   amount: Number;
-  userCreate_id: number;
+  userCreate_id: Number;
 }

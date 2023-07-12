@@ -8,6 +8,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const util_1 = require("util");
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const jwt = require("jsonwebtoken");
 async function signUp(req, res) {
     try {
@@ -59,6 +60,15 @@ async function login(req, res) {
         let refreshToken = jwt.sign({ data: { id: user.data.userName, name: user.data.password } }, primaryKey);
         await UserRepo_1.default.updateToken(user.id, accessToken, refreshToken);
         let dataUser = await UserRepo_1.default.findByUserName(req.body.userName);
+        console.log(79, dataUser);
+        let loginlog = await prisma_1.default.loginLog.create({
+            data: {
+                user_id: dataUser.data.id,
+            },
+        });
+        if (!loginlog) {
+            console.log("save login log failed");
+        }
         return res.json({
             message: "login sucessfully",
             status: 200,
@@ -133,23 +143,76 @@ async function removeUserById(req, res) {
 async function handleUser(req, res) {
     try {
         let user = req.user;
-        console.log(153, user);
         if (req.body.nickName) {
             let userUpdate = await UserRepo_1.default.handleNickName(Number(user.id), req.body.nickName);
-            return res.json({ message: "update nick name sucessfully", status: 200, data: userUpdate });
+            return res.json({
+                message: "update nick name sucessfully",
+                status: 200,
+                data: userUpdate,
+            });
         }
         if (req.body.avatar) {
             let userUpdate = await UserRepo_1.default.handleAvatar(Number(user.id), req.body.avatar);
-            return res.json({ message: "update avatar sucessfully", status: 200, data: userUpdate });
+            return res.json({
+                message: "update avatar sucessfully",
+                status: 200,
+                data: userUpdate,
+            });
         }
         if (req.body.phoneNumber) {
             let userUpdate = await UserRepo_1.default.handlePhoneNumber(Number(user.id), req.body.phoneNumber);
-            return res.json({ message: "update phone number sucessfully", status: 200, data: userUpdate });
+            return res.json({
+                message: "update phone number sucessfully",
+                status: 200,
+                data: userUpdate,
+            });
         }
         if (req.body.email) {
             let userUpdate = await UserRepo_1.default.handleEmail(Number(user.id), req.body.email);
-            return res.json({ message: "update email sucessfully", status: 200, data: userUpdate });
+            return res.json({
+                message: "update email sucessfully",
+                status: 200,
+                data: userUpdate,
+            });
         }
+    }
+    catch (e) {
+        return res.json({ message: e, status: 404 });
+    }
+}
+async function handlePassword(req, res) {
+    try {
+        let user = req.user;
+        if (!req.body.oldPassword) {
+            return res.json({
+                message: "password is required",
+                status: 404,
+            });
+        }
+        if (!req.body.newPassword) {
+            return res.json({
+                message: "password is required",
+                status: 404,
+            });
+        }
+        if (user.Role.code !== 0) {
+            const password = await bcrypt_1.default.compare(req.body.oldPassword, user.data.password);
+            if (!password) {
+                return res.json({
+                    message: "old password is not valid",
+                    status: 404,
+                });
+            }
+        }
+        let userUpdate = await UserRepo_1.default.handlePassword(user.id, req.body.newPassword);
+        if (userUpdate.status !== 200) {
+            return res.json({ message: userUpdate.message, status: 404 });
+        }
+        return res.json({
+            message: "update password sucessfully",
+            status: 200,
+            data: userUpdate,
+        });
     }
     catch (e) {
         return res.json({ message: e, status: 404 });
@@ -161,6 +224,7 @@ exports.default = {
     getAllUsers,
     removeUserById,
     getUserById,
-    handleUser
+    handleUser,
+    handlePassword,
 };
 //# sourceMappingURL=User.controller.js.map

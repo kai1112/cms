@@ -35,14 +35,14 @@ model User {
     categoryGameDelete   Category[]             @relation(name: "Delete")
     GameCreate           Game[]                 @relation(name: "create")
     GameDelete           Game[]                 @relation(name: "delete")
-    voucherCreate        Voucher[]              @relation(name: "create")
     feedbackUserSend     Feedback[]             @relation(name: "send")
     feedbackBrand        Feedback[]             @relation(name: "brand")
     KeyStore             KeyStore[]
     LoginLog             LoginLog[]
     User_update_category User_update_category[]
     User_update_game     User_update_game[]
-    user_voucher         user_voucher[]
+    Voucher              Voucher[]
+    user_voucher1        user_voucher[]
 }
 
 model User_update_category {
@@ -109,31 +109,6 @@ model Category_Game {
     game        Game     @relation(fields: [game_id], references: [id])
 }
 
-model Voucher {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    name      String
-    title     String
-    expired   DateTime // thời hạn voucher
-    status    Int      @default(0) // 0 là còn, 1 là hết hạn
-    type      String
-    amount    Int      @default(0)
-
-    userCreate_id Int
-    create        User?          @relation(fields: [userCreate_id], references: [id], name: "create")
-    user_voucher  user_voucher[]
-}
-
-model user_voucher {
-    id         Int      @id @default(autoincrement())
-    createdAt  DateTime @default(now())
-    title      String
-    user_id    Int?
-    user       User?    @relation(fields: [user_id], references: [id])
-    voucher_id Int
-    voucher    Voucher  @relation(fields: [voucher_id], references: [id])
-}
-
 model Feedback {
     id          Int      @id @default(autoincrement())
     createdAt   DateTime @default(now())
@@ -165,4 +140,30 @@ model LoginLog {
     createdAt DateTime @default(now())
     user_id   Int
     user      User     @relation(fields: [user_id], references: [id])
+}
+
+
+model Voucher {
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    name      String    @unique
+    title     String
+    expired   DateTime?
+    status    Int       @default(0) // 0 là còn thời gian, 1 là hết hạn
+    type      String?
+    amount    Int       @default(0)
+
+    userCreate_id Int?
+    create        User?          @relation(fields: [userCreate_id], references: [id])
+    user_voucher  user_voucher[]
+}
+
+model user_voucher {
+    id         Int      @id @default(autoincrement())
+    createdAt  DateTime @default(now())
+    title      String
+    user_id    Int?
+    user       User?    @relation(fields: [user_id], references: [id])
+    voucher_id Int?
+    voucher    Voucher? @relation(fields: [voucher_id], references: [id])
 }

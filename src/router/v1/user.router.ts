@@ -12,6 +12,7 @@ router.get(
   user.getAllUsers
 );
 router.post("/handle-user", checkauth.checkLogin, user.handleUser);
+router.post("/handle-password", checkauth.checkLogin, user.handlePassword);
 router.delete(
   "/delete-user/:id",
   checkauth.checkLogin,

@@ -8,9 +8,13 @@ const role_router_1 = __importDefault(require("../router/v1/role.router"));
 const user_router_1 = __importDefault(require("../router/v1/user.router"));
 const category_router_1 = __importDefault(require("../router/v1/category.router"));
 const game_router_1 = __importDefault(require("../router/v1/game.router"));
+const voucher_router_1 = __importDefault(require("../router/v1/voucher.router"));
+const dashboarh_router_1 = __importDefault(require("../router/v1/dashboarh.router"));
 router.use('/api/v1/user', user_router_1.default);
 router.use('/api/v1/role', role_router_1.default);
 router.use('/api/v1/category', category_router_1.default);
 router.use('/api/v1/game', game_router_1.default);
+router.use('/api/v1/voucher', voucher_router_1.default);
+router.use('/api/v1/dashbroarh', dashboarh_router_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map
