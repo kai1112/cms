@@ -4,7 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const prisma_1 = __importDefault(require("../lib/prisma"));
-async function create(idUser, data) {
+const Category_GameRepo_1 = __importDefault(require("../repository/Category_GameRepo"));
+const User_gameRepo_1 = __importDefault(require("../repository/User_gameRepo"));
+async function create(idUser, data, category) {
     try {
         let game = await prisma_1.default.game.create({
             data: {
@@ -18,7 +20,12 @@ async function create(idUser, data) {
         if (!game) {
             return { message: "Game not created", status: 400 };
         }
-        return { message: "success", status: 201, data: game };
+        let category_Game = await Category_GameRepo_1.default.create(Number(game.id), category);
+        console.log(20, category_Game);
+        if ((category_Game === null || category_Game === void 0 ? void 0 : category_Game.status) === 404) {
+            return { message: "create category game faild" };
+        }
+        return { message: "success", status: 200, data: game };
     }
     catch (e) {
         return { message: e, status: 404 };
@@ -95,12 +102,16 @@ async function handleDescription(idUser, id, description) {
                 id: id,
             },
             data: {
-                userUpdate_id: idUser,
+                // userUpdate_id: idUser,
                 description: description,
             },
         });
         if (!game) {
             return { message: "Game not updated", status: 404 };
+        }
+        let update = await User_gameRepo_1.default.create(idUser, game.id, "update description");
+        if (update.status !== 200) {
+            return { message: "logged user update game failed", status: 404 };
         }
         return { message: "update success", status: 200, data: game };
     }
@@ -115,10 +126,18 @@ async function handleDeveloper(idUser, id, developer) {
                 id: id,
             },
             data: {
-                userUpdate_id: idUser,
+                // userUpdate_id: idUser,
                 developer: developer,
             },
         });
+        if (!game) {
+            return { message: "Game not updated", status: 404 };
+        }
+        let update = await User_gameRepo_1.default.create(idUser, game.id, "update developer");
+        if (update.status !== 200) {
+            return { message: "logged user update game failed", status: 404 };
+        }
+        return { message: "update success", status: 200, data: game };
     }
     catch (e) {
         return { message: e, status: 404 };

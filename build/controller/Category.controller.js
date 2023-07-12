@@ -30,6 +30,7 @@ async function create(req, res) {
             });
         }
         let category = await CategoryRepo_1.default.create(Number(user.id), req.body);
+        console.log(31, category);
         if (category.status !== 200) {
             return res.json({ message: category.message, status: category.status });
         }

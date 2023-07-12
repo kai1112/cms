@@ -31,54 +31,72 @@ model User {
     role_id      Int
     Role         Role     @relation(fields: [role_id], references: [id])
 
-    categoryGameCreate Category?  @relation(name: "create")
-    categoryGameUpdate Category?  @relation(name: "Update")
-    categoryGameDelete Category?  @relation(name: "Delete")
-    GameCreate         Game[]     @relation(name: "create")
-    GameUpdate         Game[]     @relation(name: "update")
-    GameDelete         Game[]     @relation(name: "delete")
-    voucherCreate      Voucher[]  @relation(name: "create")
-    voucherUpdate      Voucher[]  @relation(name: "update")
-    feedbackUserSend   Feedback[] @relation(name: "send")
-    feedbackBrand      Feedback[] @relation(name: "brand")
-    KeyStore           KeyStore[]
-    LoginLog           LoginLog[]
+    categoryGameCreate   Category[]             @relation(name: "create")
+    categoryGameDelete   Category[]             @relation(name: "Delete")
+    GameCreate           Game[]                 @relation(name: "create")
+    GameDelete           Game[]                 @relation(name: "delete")
+    voucherCreate        Voucher[]              @relation(name: "create")
+    feedbackUserSend     Feedback[]             @relation(name: "send")
+    feedbackBrand        Feedback[]             @relation(name: "brand")
+    KeyStore             KeyStore[]
+    LoginLog             LoginLog[]
+    User_update_category User_update_category[]
+    User_update_game     User_update_game[]
+    user_voucher         user_voucher[]
+}
+
+model User_update_category {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    title       String
+    category_id Int
+    category    Category @relation(fields: [category_id], references: [id])
+    user_id     Int
+    user        User     @relation(fields: [user_id], references: [id])
+}
+
+model User_update_game {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    title     String
+    game_id   Int
+    game      Game     @relation(fields: [game_id], references: [id])
+    user_id   Int
+    user      User     @relation(fields: [user_id], references: [id])
 }
 
 model Category {
     id           Int      @id @default(autoincrement())
     createdAt    DateTime @default(now())
     updateAt     DateTime @updatedAt
-    name         String   @unique
-    status       Boolean  
-    isPushlished Boolean  
+    name         String
+    status       Boolean
+    isPushlished Boolean
 
-    userCreate_id Int             @unique
-    create        User?           @relation(fields: [userCreate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "create")
-    userUpdate_id Int?            @unique
-    update        User?           @relation(fields: [userUpdate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Update")
-    userDelete_id Int?            @unique
-    delete        User?           @relation(fields: [userDelete_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Delete")
-    category_game Category_Game[]
+    userCreate_id        Int
+    create               User?                  @relation(fields: [userCreate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "create")
+    userDelete_id        Int?
+    delete               User?                  @relation(fields: [userDelete_id], references: [id], onDelete: NoAction, onUpdate: NoAction, name: "Delete")
+    category_game        Category_Game[]
+    User_update_category User_update_category[]
 }
 
 model Game {
-    id            Int             @id @default(autoincrement())
-    createdAt     DateTime        @default(now())
-    updateAt      DateTime        @updatedAt
-    name          String          @unique @db.VarChar(30)
-    url           String          @unique @db.VarChar(40)
-    developer     String
-    description   String          @db.VarChar(300)
-    status        Int             @default(0) // 0 là hiện lên, 1 là ẩn đi
-    userCreate_id Int
-    create        User?           @relation(fields: [userCreate_id], references: [id], name: "create")
-    userUpdate_id Int?
-    update        User?           @relation(fields: [userUpdate_id], references: [id], name: "update")
-    userDelete_id Int?
-    delete        User?           @relation(fields: [userDelete_id], references: [id], name: "delete")
-    category_game Category_Game[]
-    feedback      Feedback[]
+    id               Int                @id @default(autoincrement())
+    createdAt        DateTime           @default(now())
+    updateAt         DateTime           @updatedAt
+    name             String             @unique @db.VarChar(30)
+    url              String             @unique @db.VarChar(40)
+    developer        String
+    description      String             @db.VarChar(300)
+    status           Int                @default(0) // 0 là hiện lên, 1 là ẩn đi
+    userCreate_id    Int
+    create           User?              @relation(fields: [userCreate_id], references: [id], name: "create")
+    userDelete_id    Int?
+    delete           User?              @relation(fields: [userDelete_id], references: [id], name: "delete")
+    category_game    Category_Game[]
+    feedback         Feedback[]
+    User_update_game User_update_game[]
 }
 
 model Category_Game {
@@ -94,14 +112,26 @@ model Category_Game {
 model Voucher {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
+    name      String
+    title     String
     expired   DateTime // thời hạn voucher
+    status    Int      @default(0) // 0 là còn, 1 là hết hạn
     type      String
     amount    Int      @default(0)
 
     userCreate_id Int
-    create        User? @relation(fields: [userCreate_id], references: [id], name: "create")
-    userUpdate_id Int
-    update        User? @relation(fields: [userUpdate_id], references: [id], name: "update")
+    create        User?          @relation(fields: [userCreate_id], references: [id], name: "create")
+    user_voucher  user_voucher[]
+}
+
+model user_voucher {
+    id         Int      @id @default(autoincrement())
+    createdAt  DateTime @default(now())
+    title      String
+    user_id    Int?
+    user       User?    @relation(fields: [user_id], references: [id])
+    voucher_id Int
+    voucher    Voucher  @relation(fields: [voucher_id], references: [id])
 }
 
 model Feedback {

@@ -1,7 +1,6 @@
 import { ProtectedRequest } from "app-requst";
 import { Request, Response } from "express";
 import CategoryRepo from "../repository/CategoryRepo";
-
 async function create(req: ProtectedRequest, res: Response) {
   try {
     let user = req.user;
@@ -28,6 +27,8 @@ async function create(req: ProtectedRequest, res: Response) {
       });
     }
     let category = await CategoryRepo.create(Number(user.id), req.body);
+    console.log(31, category)
+
     if (category.status !== 200) {
       return res.json({ message: category.message, status: category.status });
     }

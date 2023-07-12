@@ -13,10 +13,12 @@ async function create(req: ProtectedRequest, res: Response) {
       return res.json({ message: "developer is required", status: 404 });
     if (!req.body.description)
       return res.json({ message: "description is required", status: 404 });
+      if (!req.body.category)
+      return res.json({ message: "description is required", status: 404 });
     let findGame = await gameRepo.findName(req.body.name);
-    if (findGame.status !== 200)
-      return res.json({ message: findGame.message, status: findGame.status });
-    let game = await gameRepo.create(user.id, req.body);
+    if (findGame.status === 200)
+      return res.json({ message: 'name is already', status: findGame.status });
+    let game = await gameRepo.create(user.id, req.body, req.body.category);
     if (game.status !== 200)
       return res.json({ message: game.message, status: game.status });
     return res.json({
@@ -132,4 +134,9 @@ async function handleDeveloper(req: ProtectedRequest, res: Response) {
 }
 export default {
   create,
+  findGameByName,
+  findAll,
+  remove,
+  handleDescription,
+  handleDeveloper,
 };
